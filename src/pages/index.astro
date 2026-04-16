@@ -8,8 +8,8 @@ import {
   StatusDiagram,
   ComparisonCard,
   FaqAccordion,
-  VisdomStrip,
 } from '@virtuslab/visdom-ui';
+import { SecurityVisdomStrip } from '../components/SecurityIslands';
 
 const base = import.meta.env.BASE_URL;
 
@@ -156,12 +156,6 @@ const faqItems = [
   },
 ];
 
-const visdomProducts = [
-  { name: "ViDIA", role: "Context Fabric", href: "https://github.com/virtuslab/vidia" },
-  { name: "VCR", role: "Code Review", href: "https://virtuslab.github.io/visdom-code-review/" },
-  { name: "Testing", role: "Quality Assurance", href: "https://virtuslab.github.io/visdom-testing/" },
-  { name: "Security", role: "Sandbox & AppSec", href: `${base}`, active: true },
-];
 ---
 <BaseLayout title="Visdom Security">
 
@@ -357,7 +351,7 @@ const visdomProducts = [
   <div class="hazard-divider" aria-hidden="true"></div>
 
   <!-- ============ Visdom Strip ============ -->
-  <VisdomStrip client:load products={visdomProducts} />
+  <SecurityVisdomStrip base={base} client:load />
 
   <!-- ============ CTA ============ -->
   <section class="cta-section">

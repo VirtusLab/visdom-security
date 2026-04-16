@@ -10,7 +10,7 @@
   "dependencies": {
     "@astrojs/react": "^4.2.1",
     "@tailwindcss/vite": "^4.1.4",
-    "@virtuslab/visdom-ui": "^0.2.0",
+    "@virtuslab/visdom-ui": "^0.2.2",
     "astro": "^5.7.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
