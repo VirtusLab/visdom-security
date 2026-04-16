@@ -1,8 +1,167 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import '../styles/landing.css';
+import {
+  NumberedCard,
+  StatCard,
+  FeatureCard,
+  StatusDiagram,
+  ComparisonCard,
+  FaqAccordion,
+  VisdomStrip,
+} from '@virtuslab/visdom-ui';
 
 const base = import.meta.env.BASE_URL;
+
+const problemCards = [
+  {
+    number: "01",
+    title: "Prompt Injection",
+    description: "An agent reads a README and obeys it. A malicious dependency becomes an instruction channel.",
+  },
+  {
+    number: "02",
+    title: "Credential Exfiltration",
+    description: "Tokens in env vars end up in logs, network requests, or a helpful commit message.",
+  },
+  {
+    number: "03",
+    title: "Supply Chain Drift",
+    description: "AI reaches for the first package that compiles. Typosquats and malicious transitives slip in.",
+  },
+  {
+    number: "04",
+    title: "Vulnerable by Default",
+    description: "SQLi, XSS, path traversal — classic bugs reappear at the speed of AI code generation.",
+  },
+];
+
+const evidenceStats = [
+  {
+    value: "62%",
+    label: "of 330k LLM-generated C programs contained at least one security vulnerability.",
+    source: "Large-scale empirical study, 2024",
+    color: "red" as const,
+    href: "https://dl.acm.org/doi/10.1145/3716848",
+  },
+  {
+    value: "28.6M",
+    label: "new secrets exposed in public GitHub commits in 2025. Claude-Code-authored commits leak at ~2× the baseline rate.",
+    source: "GitGuardian State of Secrets Sprawl 2026",
+    color: "amber" as const,
+    href: "https://www.helpnetsecurity.com/2026/04/14/gitguardian-ai-agents-credentials-leak/",
+  },
+  {
+    value: "~20%",
+    label: "of package names recommended by LLMs do not exist — \"slopsquatting\" turns those names into attacks.",
+    source: "Socket / UTSA / Virginia Tech / Oklahoma, 2025",
+    color: "green" as const,
+    href: "https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks",
+  },
+];
+
+const pillarCards = [
+  {
+    label: "Runtime Containment",
+    title: "Sandcat",
+    description: "A Docker & dev container setup from VirtusLab for running AI agents in --dangerous mode safely. Every network call is routed through a transparent mitmproxy with allow/deny rules and secret injection at the proxy level.",
+    meta: "Open source · VirtusLab",
+  },
+  {
+    label: "Application Security",
+    title: "Continuous AppSec Scanning",
+    description: "Static analysis, dependency scanning, secrets detection, IaC and container checks, DAST, and runtime protection — unified and noise-reduced so findings match what the agent actually changed.",
+    meta: "Partner capability · Aikido",
+  },
+];
+
+const sandcatRows = [
+  { label: "agent → github.com", status: "allow", variant: "success" as const },
+  { label: "agent → registry.npmjs.org", status: "allow", variant: "success" as const },
+  { label: "agent → paste.ee / unknown", status: "deny", variant: "danger" as const },
+  { label: "SANDCAT_PLACEHOLDER_…", status: "substitute", variant: "warning" as const },
+  { label: "placeholder → non-allowed host", status: "403", variant: "danger" as const },
+  { label: "dns *.evil.xyz", status: "deny", variant: "danger" as const },
+  { label: "tcp/udp *", status: "deny", variant: "danger" as const },
+];
+
+const aikidoCapabilities = [
+  {
+    abbreviation: "SAST",
+    title: "Static analysis",
+    description: "Scans source for SQLi, XSS, buffer overflows and custom rules — before code merges.",
+  },
+  {
+    abbreviation: "SCA",
+    title: "Open-source & supply chain",
+    description: "Flags vulnerable and malicious packages, including transitive dependencies and license risks.",
+  },
+  {
+    abbreviation: "DAST",
+    title: "Dynamic & API testing",
+    description: "Authenticated scans against running apps and APIs to surface runtime vulnerabilities.",
+  },
+  {
+    abbreviation: "SECRETS",
+    title: "Leaked credentials",
+    description: "Detects API keys, tokens, certificates and encryption keys exposed in the repository.",
+  },
+  {
+    abbreviation: "IaC / CSPM",
+    title: "Infra & cloud posture",
+    description: "Misconfigurations across Terraform, Kubernetes, container images and major cloud providers.",
+  },
+  {
+    abbreviation: "TRIAGE",
+    title: "Noise reduction",
+    description: "Reachability analysis and context correlation across scanners cut alert volume dramatically.",
+  },
+];
+
+const altCards = [
+  {
+    label: "Containment",
+    title: "Sandcat vs the alternatives",
+    items: [
+      "Docker Sandboxes (GA Mar 2026) — per-agent microVM. Great isolation, but no transparent proxy / secret substitution.",
+      "Claude Code native sandbox — OS-level FS & network rules, vendor-specific.",
+      "Plain devcontainers — cheap, but no enforced egress policy or secret hygiene.",
+      "Sandcat — transparent mitmproxy over WireGuard, placeholder-based secret injection, works with any tool that runs in a container.",
+    ],
+  },
+  {
+    label: "AppSec scanning",
+    title: "Aikido vs the alternatives",
+    items: [
+      "Snyk — strongest vuln DB; no native DAST / CSPM / runtime; per-product pricing.",
+      "Semgrep — fastest SAST, great rule authoring; no SCA / DAST / cloud.",
+      "GitHub Advanced Security — zero-config if you already live in GitHub; narrower surface.",
+      "Aikido — SAST + SCA + DAST + Secrets + IaC + CSPM + runtime under one roof, with reachability-based triage.",
+    ],
+  },
+];
+
+const faqItems = [
+  {
+    question: "Isn't running an agent in Docker already enough?",
+    answer: "Docker contains the filesystem. It doesn't decide whether the agent can curl an arbitrary host or where a leaked GITHUB_TOKEN ends up. Sandcat routes every egress byte through mitmproxy with an allow/deny list and substitutes secrets at the proxy, so the value never lives inside the sandbox in the first place.",
+  },
+  {
+    question: "We already use Copilot / Snyk / Semgrep. Why add another thing?",
+    answer: "Those cover one side. Copilot writes code, SAST/SCA scans it — neither constrains what the agent can reach while it runs. Public benchmarks put 40–74% of LLM-generated code in the \"has vulnerabilities\" bucket depending on the benchmark; ~20% of package recommendations are hallucinated. The containment layer is the new requirement. Scanning is the safety net.",
+  },
+  {
+    question: "What if the agent gets prompt-injected inside the sandbox?",
+    answer: "Assume it will. CVE-2025-53773 (Copilot YOLO), CVE-2025-59944 (Cursor), Claude Cowork (Jan 2026) — all real. Sandcat's point is that a compromised agent still can't exfiltrate data to a non-allowlisted host, and still can't read the real secrets. AppSec scanning then catches whatever code it did manage to write. Defense in depth beats prompt filtering.",
+  },
+];
+
+const visdomProducts = [
+  { name: "ViDIA", role: "Context Fabric", href: "https://github.com/virtuslab/vidia" },
+  { name: "VCR", role: "Code Review", href: "https://virtuslab.github.io/visdom-code-review/" },
+  { name: "Testing", role: "Quality Assurance", href: "https://virtuslab.github.io/visdom-testing/" },
+  { name: "Security", role: "Sandbox & AppSec", href: `${base}`, active: true },
+];
 ---
 <BaseLayout title="Visdom Security">
 
@@ -33,26 +192,14 @@ const base = import.meta.env.BASE_URL;
       <h2 class="problem-banner__heading">Autonomous agents change the threat model</h2>
       <p class="problem-banner__subtitle">More code, generated faster, by actors that follow instructions literally.</p>
       <div class="problem-banner__grid">
-        <div class="problem-banner__card">
-          <span class="problem-banner__num">01</span>
-          <strong class="problem-banner__title">Prompt Injection</strong>
-          <p class="problem-banner__desc">An agent reads a README and obeys it. A malicious dependency becomes an instruction channel.</p>
-        </div>
-        <div class="problem-banner__card">
-          <span class="problem-banner__num">02</span>
-          <strong class="problem-banner__title">Credential Exfiltration</strong>
-          <p class="problem-banner__desc">Tokens in env vars end up in logs, network requests, or a helpful commit message.</p>
-        </div>
-        <div class="problem-banner__card">
-          <span class="problem-banner__num">03</span>
-          <strong class="problem-banner__title">Supply Chain Drift</strong>
-          <p class="problem-banner__desc">AI reaches for the first package that compiles. Typosquats and malicious transitives slip in.</p>
-        </div>
-        <div class="problem-banner__card">
-          <span class="problem-banner__num">04</span>
-          <strong class="problem-banner__title">Vulnerable by Default</strong>
-          <p class="problem-banner__desc">SQLi, XSS, path traversal &mdash; classic bugs reappear at the speed of AI code generation.</p>
-        </div>
+        {problemCards.map((card) => (
+          <NumberedCard
+            client:load
+            number={card.number}
+            title={card.title}
+            description={card.description}
+          />
+        ))}
       </div>
     </div>
   </section>
@@ -68,21 +215,16 @@ const base = import.meta.env.BASE_URL;
         Why this matters, measured. Every number below links to the source.
       </p>
       <div class="evidence-strip__grid">
-        <a href="https://dl.acm.org/doi/10.1145/3716848" class="evidence-stat">
-          <span class="evidence-stat__value">62%</span>
-          <span class="evidence-stat__label">of 330k LLM-generated C programs contained at least one security vulnerability.</span>
-          <span class="evidence-stat__source">Large-scale empirical study, 2024</span>
-        </a>
-        <a href="https://www.helpnetsecurity.com/2026/04/14/gitguardian-ai-agents-credentials-leak/" class="evidence-stat">
-          <span class="evidence-stat__value">28.6M</span>
-          <span class="evidence-stat__label">new secrets exposed in public GitHub commits in 2025. Claude-Code-authored commits leak at ~2&times; the baseline rate.</span>
-          <span class="evidence-stat__source">GitGuardian State of Secrets Sprawl 2026</span>
-        </a>
-        <a href="https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks" class="evidence-stat">
-          <span class="evidence-stat__value">~20%</span>
-          <span class="evidence-stat__label">of package names recommended by LLMs do not exist &mdash; "slopsquatting" turns those names into attacks.</span>
-          <span class="evidence-stat__source">Socket / UTSA / Virginia Tech / Oklahoma, 2025</span>
-        </a>
+        {evidenceStats.map((stat) => (
+          <StatCard
+            client:load
+            value={stat.value}
+            label={stat.label}
+            source={stat.source}
+            color={stat.color}
+            href={stat.href}
+          />
+        ))}
       </div>
     </div>
   </section>
@@ -95,24 +237,15 @@ const base = import.meta.env.BASE_URL;
         Contain the agent while it writes the code. Scan what it produces before anyone deploys it.
       </p>
       <div class="pillars-grid">
-        <div class="pillar-card">
-          <span class="pillar-card__label">Runtime Containment</span>
-          <h3 class="pillar-card__title">Sandcat</h3>
-          <p class="pillar-card__desc">
-            A Docker &amp; dev container setup from VirtusLab for running AI agents in <code>--dangerous</code> mode safely.
-            Every network call is routed through a transparent mitmproxy with allow/deny rules and secret injection at the proxy level.
-          </p>
-          <p class="pillar-card__meta">Open source &middot; VirtusLab</p>
-        </div>
-        <div class="pillar-card">
-          <span class="pillar-card__label">Application Security</span>
-          <h3 class="pillar-card__title">Continuous AppSec Scanning</h3>
-          <p class="pillar-card__desc">
-            Static analysis, dependency scanning, secrets detection, IaC and container checks, DAST, and runtime protection &mdash;
-            unified and noise-reduced so findings match what the agent actually changed.
-          </p>
-          <p class="pillar-card__meta">Partner capability &middot; Aikido</p>
-        </div>
+        {pillarCards.map((card) => (
+          <FeatureCard
+            client:load
+            label={card.label}
+            title={card.title}
+            description={card.description}
+            meta={card.meta}
+          />
+        ))}
       </div>
     </div>
   </section>
@@ -145,36 +278,7 @@ const base = import.meta.env.BASE_URL;
           <a href="https://github.com/VirtusLab/sandcat" class="btn btn--outline">View on GitHub &rarr;</a>
         </p>
       </div>
-      <div class="sandcat-diagram" aria-hidden="true">
-        <div class="sandcat-diagram__row">
-          <span>agent &rarr; github.com</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--allow">allow</span>
-        </div>
-        <div class="sandcat-diagram__row">
-          <span>agent &rarr; registry.npmjs.org</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--allow">allow</span>
-        </div>
-        <div class="sandcat-diagram__row">
-          <span>agent &rarr; paste.ee / unknown</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--deny">deny</span>
-        </div>
-        <div class="sandcat-diagram__row">
-          <span>SANDCAT_PLACEHOLDER_&hellip;</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--inject">substitute</span>
-        </div>
-        <div class="sandcat-diagram__row">
-          <span>placeholder &rarr; non-allowed host</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--deny">403</span>
-        </div>
-        <div class="sandcat-diagram__row">
-          <span>dns *.evil.xyz</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--deny">deny</span>
-        </div>
-        <div class="sandcat-diagram__row">
-          <span>tcp/udp &ast;</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--deny">deny</span>
-        </div>
-      </div>
+      <StatusDiagram client:load rows={sandcatRows} />
     </div>
   </section>
 
@@ -197,36 +301,14 @@ const base = import.meta.env.BASE_URL;
         </p>
 
         <div class="partner-card__grid">
-          <div class="partner-capability">
-            <span class="partner-capability__abbr">SAST</span>
-            <h4 class="partner-capability__title">Static analysis</h4>
-            <p class="partner-capability__desc">Scans source for SQLi, XSS, buffer overflows and custom rules &mdash; before code merges.</p>
-          </div>
-          <div class="partner-capability">
-            <span class="partner-capability__abbr">SCA</span>
-            <h4 class="partner-capability__title">Open-source &amp; supply chain</h4>
-            <p class="partner-capability__desc">Flags vulnerable and malicious packages, including transitive dependencies and license risks.</p>
-          </div>
-          <div class="partner-capability">
-            <span class="partner-capability__abbr">DAST</span>
-            <h4 class="partner-capability__title">Dynamic &amp; API testing</h4>
-            <p class="partner-capability__desc">Authenticated scans against running apps and APIs to surface runtime vulnerabilities.</p>
-          </div>
-          <div class="partner-capability">
-            <span class="partner-capability__abbr">SECRETS</span>
-            <h4 class="partner-capability__title">Leaked credentials</h4>
-            <p class="partner-capability__desc">Detects API keys, tokens, certificates and encryption keys exposed in the repository.</p>
-          </div>
-          <div class="partner-capability">
-            <span class="partner-capability__abbr">IaC / CSPM</span>
-            <h4 class="partner-capability__title">Infra &amp; cloud posture</h4>
-            <p class="partner-capability__desc">Misconfigurations across Terraform, Kubernetes, container images and major cloud providers.</p>
-          </div>
-          <div class="partner-capability">
-            <span class="partner-capability__abbr">TRIAGE</span>
-            <h4 class="partner-capability__title">Noise reduction</h4>
-            <p class="partner-capability__desc">Reachability analysis and context correlation across scanners cut alert volume dramatically.</p>
-          </div>
+          {aikidoCapabilities.map((cap) => (
+            <FeatureCard
+              client:load
+              abbreviation={cap.abbreviation}
+              title={cap.title}
+              description={cap.description}
+            />
+          ))}
         </div>
 
         <p class="partner-card__note">
@@ -249,26 +331,14 @@ const base = import.meta.env.BASE_URL;
         plus scanning that pays attention to what the agent actually changed.
       </p>
       <div class="alt-grid">
-        <div class="alt-card">
-          <p class="alt-card__label">Containment</p>
-          <h3 class="alt-card__title">Sandcat vs the alternatives</h3>
-          <ul class="alt-card__list">
-            <li><strong>Docker Sandboxes</strong> (GA Mar 2026) &mdash; per-agent microVM. Great isolation, but no transparent proxy / secret substitution.</li>
-            <li><strong>Claude Code native sandbox</strong> &mdash; OS-level FS &amp; network rules, vendor-specific.</li>
-            <li><strong>Plain devcontainers</strong> &mdash; cheap, but no enforced egress policy or secret hygiene.</li>
-            <li><strong>Sandcat</strong> &mdash; transparent mitmproxy over WireGuard, placeholder-based secret injection, works with any tool that runs in a container.</li>
-          </ul>
-        </div>
-        <div class="alt-card">
-          <p class="alt-card__label">AppSec scanning</p>
-          <h3 class="alt-card__title">Aikido vs the alternatives</h3>
-          <ul class="alt-card__list">
-            <li><strong>Snyk</strong> &mdash; strongest vuln DB; no native DAST / CSPM / runtime; per-product pricing.</li>
-            <li><strong>Semgrep</strong> &mdash; fastest SAST, great rule authoring; no SCA / DAST / cloud.</li>
-            <li><strong>GitHub Advanced Security</strong> &mdash; zero-config if you already live in GitHub; narrower surface.</li>
-            <li><strong>Aikido</strong> &mdash; SAST + SCA + DAST + Secrets + IaC + CSPM + runtime under one roof, with reachability-based triage.</li>
-          </ul>
-        </div>
+        {altCards.map((card) => (
+          <ComparisonCard
+            client:load
+            label={card.label}
+            title={card.title}
+            items={card.items}
+          />
+        ))}
       </div>
       <p class="alt-section__footnote">
         Vendor is pluggable. The capability &mdash; code-to-runtime scanning with noise reduction &mdash; is the requirement.
@@ -280,71 +350,14 @@ const base = import.meta.env.BASE_URL;
   <section class="faq-section">
     <div class="faq-section__inner">
       <h2 class="section-heading">FAQ</h2>
-      <div class="faq-list">
-        <details class="faq-item">
-          <summary class="faq-item__q">Isn't running an agent in Docker already enough?</summary>
-          <div class="faq-item__a">
-            <p>
-              Docker contains the filesystem. It doesn't decide whether the agent can <code>curl</code> an arbitrary host
-              or where a leaked <code>GITHUB_TOKEN</code> ends up. Sandcat routes every egress byte through mitmproxy with an
-              allow/deny list and substitutes secrets at the proxy, so the value never lives inside the sandbox in the first place.
-            </p>
-          </div>
-        </details>
-        <details class="faq-item">
-          <summary class="faq-item__q">We already use Copilot / Snyk / Semgrep. Why add another thing?</summary>
-          <div class="faq-item__a">
-            <p>
-              Those cover one side. Copilot writes code, SAST/SCA scans it &mdash; neither constrains <em>what the agent can reach while it runs</em>.
-              Public benchmarks put 40&ndash;74% of LLM-generated code in the "has vulnerabilities" bucket depending on the benchmark;
-              ~20% of package recommendations are hallucinated. The containment layer is the new requirement. Scanning is the safety net.
-            </p>
-          </div>
-        </details>
-        <details class="faq-item">
-          <summary class="faq-item__q">What if the agent gets prompt-injected inside the sandbox?</summary>
-          <div class="faq-item__a">
-            <p>
-              Assume it will. CVE-2025-53773 (Copilot YOLO), CVE-2025-59944 (Cursor), Claude Cowork (Jan 2026) &mdash; all real.
-              Sandcat's point is that a compromised agent <em>still can't</em> exfiltrate data to a non-allowlisted host, and
-              <em>still can't</em> read the real secrets. AppSec scanning then catches whatever code it did manage to write.
-              Defense in depth beats prompt filtering.
-            </p>
-          </div>
-        </details>
-      </div>
+      <FaqAccordion client:load items={faqItems} />
     </div>
   </section>
 
   <div class="hazard-divider" aria-hidden="true"></div>
 
   <!-- ============ Visdom Strip ============ -->
-  <section class="visdom-strip">
-    <div class="visdom-strip__inner">
-      <div class="visdom-strip__label">
-        <span class="kicker" style="margin-bottom: 0;">Part of Visdom</span>
-        <p class="visdom-strip__desc">VirtusLab's AI-Native SDLC</p>
-      </div>
-      <div class="visdom-strip__items">
-        <a href="https://github.com/virtuslab/vidia" class="visdom-strip__item">
-          <span class="visdom-strip__item-name">ViDIA</span>
-          <span class="visdom-strip__item-role">Context Fabric</span>
-        </a>
-        <a href="https://virtuslab.github.io/visdom-code-review/" class="visdom-strip__item">
-          <span class="visdom-strip__item-name">VCR</span>
-          <span class="visdom-strip__item-role">Code Review</span>
-        </a>
-        <a href="https://virtuslab.github.io/visdom-testing/" class="visdom-strip__item">
-          <span class="visdom-strip__item-name">Testing</span>
-          <span class="visdom-strip__item-role">Quality Assurance</span>
-        </a>
-        <a href={`${base}`} class="visdom-strip__item visdom-strip__item--active">
-          <span class="visdom-strip__item-name">Security</span>
-          <span class="visdom-strip__item-role">Sandbox &amp; AppSec</span>
-        </a>
-      </div>
-    </div>
-  </section>
+  <VisdomStrip client:load products={visdomProducts} />
 
   <!-- ============ CTA ============ -->
   <section class="cta-section">
