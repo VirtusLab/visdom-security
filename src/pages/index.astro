@@ -25,6 +25,8 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
+  <div class="hazard-divider" aria-hidden="true"></div>
+
   <!-- ============ Problem Banner ============ -->
   <section class="problem-banner">
     <div class="problem-banner__inner">
@@ -58,7 +60,10 @@ const base = import.meta.env.BASE_URL;
   <!-- ============ Evidence Stats ============ -->
   <section class="evidence-strip">
     <div class="evidence-strip__inner">
-      <h2 class="section-heading">The evidence, not the vibes</h2>
+      <div class="section-header-center">
+        <span class="ops-kicker">Evidence log</span>
+        <h2 class="section-heading">The evidence, not the vibes</h2>
+      </div>
       <p class="section-subtitle">
         Why this matters, measured. Every number below links to the source.
       </p>
@@ -235,7 +240,10 @@ const base = import.meta.env.BASE_URL;
   <!-- ============ Alternatives ============ -->
   <section class="alt-section">
     <div class="alt-section__inner">
-      <h2 class="section-heading">Why this combo?</h2>
+      <div class="section-header-center">
+        <span class="ops-kicker ops-kicker--light">Compare</span>
+        <h2 class="section-heading">Why this combo?</h2>
+      </div>
       <p class="section-subtitle">
         Good tools exist on both sides. Visdom Security is the glue &mdash; runtime containment with a mitmproxy-enforced network boundary,
         plus scanning that pays attention to what the agent actually changed.
@@ -307,6 +315,8 @@ const base = import.meta.env.BASE_URL;
       </div>
     </div>
   </section>
+
+  <div class="hazard-divider" aria-hidden="true"></div>
 
   <!-- ============ Visdom Strip ============ -->
   <section class="visdom-strip">
