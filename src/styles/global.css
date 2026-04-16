@@ -23,6 +23,15 @@
   --max-width-doc: 48rem;
 }
 
+/* Override DS primary color — Security uses amber */
+:root {
+  --primary: oklch(0.769 0.188 70.08);          /* amber-500 */
+  --primary-foreground: oklch(0.13 0.005 260);   /* dark text on amber */
+  --ring: oklch(0.769 0.188 70.08);
+  --accent: oklch(0.94 0.03 80);
+  --accent-foreground: oklch(0.45 0.1 65);
+}
+
 @layer base {
   body {
     @apply bg-white text-visdom-gray-600 antialiased;
