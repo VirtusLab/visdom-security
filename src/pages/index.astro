@@ -55,6 +55,33 @@ const base = import.meta.env.BASE_URL;
     </div>
   </section>
 
+  <!-- ============ Evidence Stats ============ -->
+  <section class="evidence-strip">
+    <div class="evidence-strip__inner">
+      <h2 class="section-heading">The evidence, not the vibes</h2>
+      <p class="section-subtitle">
+        Why this matters, measured. Every number below links to the source.
+      </p>
+      <div class="evidence-strip__grid">
+        <a href="https://dl.acm.org/doi/10.1145/3716848" class="evidence-stat">
+          <span class="evidence-stat__value">62%</span>
+          <span class="evidence-stat__label">of 330k LLM-generated C programs contained at least one security vulnerability.</span>
+          <span class="evidence-stat__source">Large-scale empirical study, 2024</span>
+        </a>
+        <a href="https://www.helpnetsecurity.com/2026/04/14/gitguardian-ai-agents-credentials-leak/" class="evidence-stat">
+          <span class="evidence-stat__value">28.6M</span>
+          <span class="evidence-stat__label">new secrets exposed in public GitHub commits in 2025. Claude-Code-authored commits leak at ~2&times; the baseline rate.</span>
+          <span class="evidence-stat__source">GitGuardian State of Secrets Sprawl 2026</span>
+        </a>
+        <a href="https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks" class="evidence-stat">
+          <span class="evidence-stat__value">~20%</span>
+          <span class="evidence-stat__label">of package names recommended by LLMs do not exist &mdash; "slopsquatting" turns those names into attacks.</span>
+          <span class="evidence-stat__source">Socket / UTSA / Virginia Tech / Oklahoma, 2025</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ Two Pillars ============ -->
   <section class="pillars-section">
     <div class="pillars-section__inner">
@@ -97,8 +124,13 @@ const base = import.meta.env.BASE_URL;
           No per-tool proxy configuration. No tool can bypass the network boundary.
         </p>
         <p>
-          An allow/deny engine decides which destinations the agent can reach. Secrets are never copied into the container;
-          instead they are injected at the proxy layer, so a compromised agent cannot read them.
+          An allow/deny engine decides which destinations the agent can reach. <strong>Real secrets never enter the container.</strong>
+          Environment variables hold placeholders like <code>SANDCAT_PLACEHOLDER_GITHUB_TOKEN</code>; mitmproxy substitutes the
+          real value only for outbound requests to allowlisted hosts &mdash; anything else is blocked with HTTP 403.
+        </p>
+        <p>
+          WireGuard lives in a dedicated network container with <code>NET_ADMIN</code>. App containers share its network namespace
+          and inherit the firewall rules, but cannot modify them. A compromised agent can neither read the secrets nor escape the tunnel.
         </p>
         <p>
           Works as a dev container or standalone. Production-validated on Java and Scala projects with Claude Code &mdash;
@@ -122,8 +154,12 @@ const base = import.meta.env.BASE_URL;
           <span class="sandcat-diagram__pill sandcat-diagram__pill--deny">deny</span>
         </div>
         <div class="sandcat-diagram__row">
-          <span>$GITHUB_TOKEN</span>
-          <span class="sandcat-diagram__pill sandcat-diagram__pill--inject">inject</span>
+          <span>SANDCAT_PLACEHOLDER_&hellip;</span>
+          <span class="sandcat-diagram__pill sandcat-diagram__pill--inject">substitute</span>
+        </div>
+        <div class="sandcat-diagram__row">
+          <span>placeholder &rarr; non-allowed host</span>
+          <span class="sandcat-diagram__pill sandcat-diagram__pill--deny">403</span>
         </div>
         <div class="sandcat-diagram__row">
           <span>dns *.evil.xyz</span>
@@ -192,6 +228,82 @@ const base = import.meta.env.BASE_URL;
           Aikido is a third-party partner. Logo and product names are trademarks of their respective owners.
           Visdom Security focuses on the capability; the vendor is pluggable.
         </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Alternatives ============ -->
+  <section class="alt-section">
+    <div class="alt-section__inner">
+      <h2 class="section-heading">Why this combo?</h2>
+      <p class="section-subtitle">
+        Good tools exist on both sides. Visdom Security is the glue &mdash; runtime containment with a mitmproxy-enforced network boundary,
+        plus scanning that pays attention to what the agent actually changed.
+      </p>
+      <div class="alt-grid">
+        <div class="alt-card">
+          <p class="alt-card__label">Containment</p>
+          <h3 class="alt-card__title">Sandcat vs the alternatives</h3>
+          <ul class="alt-card__list">
+            <li><strong>Docker Sandboxes</strong> (GA Mar 2026) &mdash; per-agent microVM. Great isolation, but no transparent proxy / secret substitution.</li>
+            <li><strong>Claude Code native sandbox</strong> &mdash; OS-level FS &amp; network rules, vendor-specific.</li>
+            <li><strong>Plain devcontainers</strong> &mdash; cheap, but no enforced egress policy or secret hygiene.</li>
+            <li><strong>Sandcat</strong> &mdash; transparent mitmproxy over WireGuard, placeholder-based secret injection, works with any tool that runs in a container.</li>
+          </ul>
+        </div>
+        <div class="alt-card">
+          <p class="alt-card__label">AppSec scanning</p>
+          <h3 class="alt-card__title">Aikido vs the alternatives</h3>
+          <ul class="alt-card__list">
+            <li><strong>Snyk</strong> &mdash; strongest vuln DB; no native DAST / CSPM / runtime; per-product pricing.</li>
+            <li><strong>Semgrep</strong> &mdash; fastest SAST, great rule authoring; no SCA / DAST / cloud.</li>
+            <li><strong>GitHub Advanced Security</strong> &mdash; zero-config if you already live in GitHub; narrower surface.</li>
+            <li><strong>Aikido</strong> &mdash; SAST + SCA + DAST + Secrets + IaC + CSPM + runtime under one roof, with reachability-based triage.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="alt-section__footnote">
+        Vendor is pluggable. The capability &mdash; code-to-runtime scanning with noise reduction &mdash; is the requirement.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="faq-section">
+    <div class="faq-section__inner">
+      <h2 class="section-heading">FAQ</h2>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary class="faq-item__q">Isn't running an agent in Docker already enough?</summary>
+          <div class="faq-item__a">
+            <p>
+              Docker contains the filesystem. It doesn't decide whether the agent can <code>curl</code> an arbitrary host
+              or where a leaked <code>GITHUB_TOKEN</code> ends up. Sandcat routes every egress byte through mitmproxy with an
+              allow/deny list and substitutes secrets at the proxy, so the value never lives inside the sandbox in the first place.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-item__q">We already use Copilot / Snyk / Semgrep. Why add another thing?</summary>
+          <div class="faq-item__a">
+            <p>
+              Those cover one side. Copilot writes code, SAST/SCA scans it &mdash; neither constrains <em>what the agent can reach while it runs</em>.
+              Public benchmarks put 40&ndash;74% of LLM-generated code in the "has vulnerabilities" bucket depending on the benchmark;
+              ~20% of package recommendations are hallucinated. The containment layer is the new requirement. Scanning is the safety net.
+            </p>
+          </div>
+        </details>
+        <details class="faq-item">
+          <summary class="faq-item__q">What if the agent gets prompt-injected inside the sandbox?</summary>
+          <div class="faq-item__a">
+            <p>
+              Assume it will. CVE-2025-53773 (Copilot YOLO), CVE-2025-59944 (Cursor), Claude Cowork (Jan 2026) &mdash; all real.
+              Sandcat's point is that a compromised agent <em>still can't</em> exfiltrate data to a non-allowlisted host, and
+              <em>still can't</em> read the real secrets. AppSec scanning then catches whatever code it did manage to write.
+              Defense in depth beats prompt filtering.
+            </p>
+          </div>
+        </details>
       </div>
     </div>
   </section>
