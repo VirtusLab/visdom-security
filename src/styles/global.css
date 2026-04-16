@@ -17,19 +17,23 @@
   --color-visdom-gray-800: #1f2937;
   --color-visdom-gray-900: #111827;
 
+  /* shadcn/visdom-ui primitives — Security uses amber as primary */
+  --color-background: #ffffff;
+  --color-foreground: #111827;
+  --color-primary: oklch(0.769 0.188 70.08);            /* amber-500 */
+  --color-primary-foreground: oklch(0.13 0.005 260);     /* dark text on amber */
+  --color-muted: #f9fafb;
+  --color-muted-foreground: #9ca3af;
+  --color-accent: oklch(0.94 0.03 80);
+  --color-accent-foreground: oklch(0.45 0.1 65);
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
+  --color-ring: oklch(0.769 0.188 70.08);
+
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   --max-width-doc: 48rem;
-}
-
-/* Override DS primary color — Security uses amber */
-:root {
-  --primary: oklch(0.769 0.188 70.08);          /* amber-500 */
-  --primary-foreground: oklch(0.13 0.005 260);   /* dark text on amber */
-  --ring: oklch(0.769 0.188 70.08);
-  --accent: oklch(0.94 0.03 80);
-  --accent-foreground: oklch(0.45 0.1 65);
 }
 
 @layer base {
