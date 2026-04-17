@@ -1185,6 +1185,13 @@ body {
   background: var(--ink);
   color: #e5e7eb;
   padding: 72px 24px;
+  /* shadcn/visdom-ui primitives scoped to the dark FAQ section so FaqAccordion
+     (which uses text-foreground / text-muted-foreground / bg-card / border) is readable. */
+  --foreground: #ffffff;
+  --muted-foreground: rgba(229,231,235,0.80);
+  --primary: var(--caution-yellow);
+  --card: var(--ink-soft);
+  --border: var(--ink-line);
 }
 .faq-section .section-heading { color: #ffffff; }
 .faq-section .section-heading::before {
