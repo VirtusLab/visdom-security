@@ -916,6 +916,12 @@ body {
   background: #111118;
   background-image: radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.06) 0%, transparent 60%);
   padding: 72px 24px;
+  /* shadcn/visdom-ui primitives scoped to the dark problem-banner so NumberedCard
+     (which uses text-foreground / text-muted-foreground / bg-card / border) is readable. */
+  --foreground: #ffffff;
+  --muted-foreground: rgba(229,231,235,0.80);
+  --card: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.1);
 }
 .problem-banner__heading {
   font-family: var(--font-mono);
