@@ -11,6 +11,7 @@ interface SecurityVisdomStripProps {
 export function SecurityVisdomStrip({ base }: SecurityVisdomStripProps) {
   return (
     <VisdomStrip
+      className="visdom-strip--security"
       subtitle={
         <>
           Visdom Security is one of four components in{" "}

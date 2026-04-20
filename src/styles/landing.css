@@ -1237,6 +1237,29 @@ body {
   border-radius: 2px;
 }
 
+/* FaqAccordion (DS) — terminal aesthetic inside .faq-section */
+.faq-section button {
+  font-family: var(--font-mono) !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+}
+.faq-section button > span:first-child::before {
+  content: "> ";
+  color: var(--caution-yellow);
+}
+.faq-section button:hover {
+  color: var(--caution-yellow) !important;
+}
+/* Open state: the component swaps to text-primary (amber); keep mono + prompt */
+.faq-section .text-primary {
+  color: var(--caution-yellow) !important;
+}
+/* Answer body */
+.faq-section [class*="text-foreground/"] {
+  font-family: var(--font-body);
+  color: rgba(229,231,235,0.8) !important;
+}
+
 /* ---- Visdom strip: slightly sharper to match ---- */
 .visdom-strip__item {
   border-radius: 2px;

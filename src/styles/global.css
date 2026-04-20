@@ -1,11 +1,15 @@
 @import "tailwindcss";
+@import "@virtuslab/visdom-ui/styles.css";
 
 @source "../../node_modules/@virtuslab/visdom-ui/dist";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
-  --color-visdom-blue: #3b82f6;
-  --color-visdom-blue-light: #eff6ff;
-  --color-visdom-blue-dark: #2563eb;
+  /* Security uses amber for accent links (not blue like other Visdom sites) */
+  --color-visdom-blue: #b45309;        /* amber-700 */
+  --color-visdom-blue-light: #fef3c7;  /* amber-100 */
+  --color-visdom-blue-dark: #92400e;   /* amber-800 */
   --color-visdom-gray-50: #f9fafb;
   --color-visdom-gray-100: #f3f4f6;
   --color-visdom-gray-200: #e5e7eb;
@@ -35,6 +39,51 @@
 
   --max-width-doc: 48rem;
 }
+
+/* Override DS primary color — Security uses amber (DS components read var(--primary) directly) */
+:root {
+  --primary: oklch(0.769 0.188 70.08);          /* amber-500 */
+  --primary-foreground: oklch(0.13 0.005 260);   /* dark text on amber */
+  --ring: oklch(0.769 0.188 70.08);
+  --accent: oklch(0.94 0.03 80);
+  --accent-foreground: oklch(0.45 0.1 65);
+}
+
+/* Dark sections: flip DS tokens so NumberedCard / FaqAccordion / FeatureCard
+   render with light foreground on the hazard-themed dark backgrounds. */
+.dark {
+  --background: oklch(0.13 0.005 260);
+  --foreground: oklch(0.93 0.005 250);
+  --card: oklch(0.17 0.008 260);
+  --card-foreground: oklch(0.93 0.005 250);
+  --muted: oklch(0.21 0.01 260);
+  --muted-foreground: oklch(0.72 0.01 250);
+  --border: oklch(1 0 0 / 12%);
+  --primary: oklch(0.82 0.17 75);               /* brighter amber on dark */
+  --primary-foreground: oklch(0.13 0.005 260);
+  --ring: oklch(0.82 0.17 75);
+  --accent: oklch(0.21 0.01 260);
+  --accent-foreground: oklch(0.93 0.005 250);
+}
+
+/* DS components hardcode text-blue-600 for category labels and accent links.
+   Remap those utilities site-wide to the amber palette so Security stays on-brand. */
+.text-blue-600 { color: var(--color-visdom-blue) !important; }
+.text-blue-500 { color: var(--color-visdom-blue) !important; }
+.text-blue-400 { color: oklch(0.82 0.17 75) !important; }
+.bg-blue-500 { background-color: var(--color-visdom-blue) !important; }
+.bg-blue-600 { background-color: var(--color-visdom-blue) !important; }
+
+/* Nav brand: the wrapping <a> inherits the global link color. Reset to foreground
+   so "Visdom" reads as a brand wordmark, not a blue hyperlink. */
+nav a.no-underline,
+nav a.no-underline:hover {
+  color: var(--color-visdom-gray-900);
+}
+
+/* VisdomStrip: tighten role → name spacing (DS defaults leave too much air). */
+.visdom-strip--security a > span:first-child { margin-bottom: 0.125rem; }
+.visdom-strip--security a > span:nth-child(2) { margin-bottom: 0.25rem; }
 
 @layer base {
   body {
