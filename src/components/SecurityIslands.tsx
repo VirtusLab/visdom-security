@@ -21,8 +21,8 @@ export function SecurityVisdomStrip({ base }: SecurityVisdomStripProps) {
       }
       products={[
         {
-          role: "Context Fabric",
-          name: "ViDIA",
+          role: "Repository context",
+          name: "Context Fabric",
           description: "Pre-indexed code expertise, dependency graphs, PR history",
           href: undefined,
           active: false,
